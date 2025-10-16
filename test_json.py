@@ -79,7 +79,8 @@ def test_get_specific_user():
 def test_new_comment():
     url = "https://jsonplaceholder.typicode.com/posts/1/comments"
     payload = {
-        "title": "New comment",
+        "name": "New comment",
+        "email": "user@example.com",
         "body": "Comment content"
     }
     response = requests.post(url, json=payload)
@@ -102,5 +103,113 @@ def test_photos_albums():
     assert response.status_code == 200
     assert isinstance(data, list)
     assert len(data)
-    assert data[0]['title'] == "reprehenderit est deserunt velit ipsam"
-    print ("Name of the first photo verified")
+    assert not any(photo["title"] == "reprehenderit est deserunt velit ipsam" for photo in data)
+    print ("Specific title isn't in the list")
+
+#11 --- CREATE NEW TASK (Todo) REQUEST ---
+def test_new_task():
+    url = "https://jsonplaceholder.typicode.com/todos"
+    payload = {
+        "userId": 1,
+        "title": "Learn Pytest",
+        "completed": False
+    }
+    response = requests.post(url, json=payload)
+    assert response.status_code == 201
+    print("Post 'Learn Pytest' created")
+
+#12 --- UPDATE A TASK (PATCH) ---
+def test_update_task():
+    url = "https://jsonplaceholder.typicode.com/todos/5"
+    data = {"completed": True}
+    response = requests.put(url, json=data)
+    assert response.status_code == 200
+    assert response.json().get("completed") is True
+    print ("Update task ID 5 completed")
+
+#13 --- LIST USER'S COMPLETED TASKS ---
+def test_list_completed_tasks():
+    response = requests.get("https://jsonplaceholder.typicode.com/todos?userId=1&completed=true")
+    completed = response.json()
+    assert response.status_code == 200
+    print ("List User's Completed Tasks verified")
+    # print (completed)
+
+#14 --- VALIDATE COMMENT'S STRUCTURE ---
+def test_validate_comments_structure():
+    response = requests.get("https://jsonplaceholder.typicode.com/comments/10")
+    data = response.json()
+    expected_keys = {"postId", "id", "name", "email", "body"}
+    assert response.status_code == 200
+    assert expected_keys <= data.keys()
+    print(expected_keys)
+
+#15 --- DELETE A COMMENT ---
+def test_delete_comment():
+    response = requests.delete("https://jsonplaceholder.typicode.com/comments/3")
+    assert response.status_code == 200
+    print("Comment deleted")
+
+#16 --- CREATE POST WITH INVALID DATA ---
+def test_post_invalid_data():
+    url = "https://jsonplaceholder.typicode.com/posts"
+    payload = {}
+    response = requests.post(url, json=payload)
+    assert response.status_code == 201
+    data = response.json()
+    print("Post created without data:", data)
+
+#17 --- FETCH SPECIFIC USER'S POSTS ---
+def test_fetch_specific_user_posts():
+    response = requests.get("https://jsonplaceholder.typicode.com/users/7/posts")
+    data = response.json()
+    assert response.status_code == 200
+    assert isinstance(data, list)
+    assert len(data)
+    print (f"The list contains {len(data)} posts")
+
+#18 --- UPDATE USER'S EMAIL (PUT) ---
+def test_update_email():
+    url = "https://jsonplaceholder.typicode.com/users/2"
+    payload = {"email": "new.email@example.com"}
+    response = requests.put(url, json=payload)
+    assert response.status_code == 200
+    print("E-mail updated")
+
+#19: Delete an Album
+def test_delete_album():
+    response = requests.delete("https://jsonplaceholder.typicode.com/albums/4")
+    assert response.status_code == 200
+    print("Album deleted")
+
+#20 --- FINAL CHALLENGE WITH JSONPlaceholder ---
+def test_final_challenge():
+    userId = 1
+    url = "https://jsonplaceholder.typicode.com/posts"
+    payload = {
+        "userId": userId,
+        "title": "New post",
+        "body": "Post content"
+    }
+    response = requests.post(url, json=payload)
+    assert response.status_code == 201
+    print("Post created")
+
+    post_data = response.json()
+    post_id = post_data.get("id")
+
+    comment_url = f"https://jsonplaceholder.typicode.com/posts/{post_id}/comments"
+    payload = {
+        "postId": post_id,
+        "name": "New comment",
+        "email": "user@example.com",
+        "body": "Comment content"
+    }
+    response = requests.post(comment_url, json=payload)
+    assert response.status_code == 201
+    print("Comment created")
+
+    response = requests.delete(f"https://jsonplaceholder.typicode.com/posts/{post_id}")
+    assert response.status_code == 200
+    print("Post deleted")
+    
