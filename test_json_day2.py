@@ -34,7 +34,7 @@ def test_list_completed_todos():
     assert response.status_code == 200
     assert isinstance(data, list)
     assert all(todo["completed"] == True for todo in data)
-    print (f"Todos verified")
+    print (f"Todo verified")
 
 
 
@@ -54,33 +54,136 @@ def test_headers_1():
     print("Custom header verified")
 
 # 6. Send a request to httpbin.org/response-headers to set a custom response header (e.g., My-Test-Header: Hello) and check if it is present in the response headers.
+def test_headers_2():
+    url = "https://httpbin.org/response-headers?My-Test-Header=Hello" 
+    # >>>>>> “Quando acessar a URL, quero que a resposta contenha o header My-Test-Header com o valor Hello”.
+    
+    response = requests.get(url)
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data.get("My-Test-Header") == "Hello", f"Header not found or incorrect: {data}"
+    print("Response headers verified")
+
+# >>> OUTRA OPÇÃO - USANDO PARAMS <<<<<
+# def test_headers_2():
+#     url = "https://httpbin.org/response-headers"
+#     params = {"My-Test-Header": "Hello"}
+
+#     response = requests.get(url, params=params)
+#     assert response.status_code == 200
+
+#     data = response.json()
+#     assert data.get("My-Test-Header") == "Hello", f"Header not found or incorrect: {data}"
+#     print("Header is in response headers")
+
 
 # 7. Send a request to httpbin.org/headers with a custom User-Agent header ("My-Test-Agent/1.0") and validate if it was received correctly.
+def test_headers_3():
+    url = "https://httpbin.org/headers"
+    headers = {"User-Agent": "My-test-Agent/1.0"}
+
+    response = requests.get(url, headers=headers)
+    assert response.status_code == 200
+
+    data = response.json()
+    headers_received = data.get("headers", {})
+
+    assert headers_received.get("User-Agent") == "My-test-Agent/1.0", f"User-Agent not received correctly: {headers_received}"
+    print("User-Agent header verified")
+
 
 # 8. Send multiple custom headers (X-Header-1: Value1, X-Header-2: Value2) in a single request to httpbin.org/headers and validate all of them.
+def test_headers_4():
+    url = "https://httpbin.org/headers"
+    headers = {"X-Header-1": "Value1",
+               "X-Header-2": "Value2"}
 
+    response = requests.get(url, headers=headers)
+    assert response.status_code == 200
 
+    data = response.json()
+    headers_received = data.get("headers", {})
 
+    assert headers_received.get("X-Header-1") == "Value1" and headers_received.get("X-Header-2") == "Value2"
+    print("Custom headers verified")
 
 
 # --- AUTHENTICATION ---
 # 9. Test the httpbin Basic Auth endpoint (/basic-auth/user/passwd) with the correct credentials (user, passwd) and validate the 200 status.
+def test_auth_1():
+    response = requests.get('https://httpbin.org/basic-auth/user/passwd', auth=('user', 'passwd'))
+    assert response.status_code == 200
+    data = response.json()
+    assert data.get("authenticated") is True # <<< comando adicional de verificação
+    assert data.get("user") == "user" # <<< comando adicional de verificação
+    print("Correct credentials verified")
 
 # 10. Test the same Basic Auth endpoint with a correct user but wrong password and validate the 401 status.
+def test_auth_2():
+    response = requests.get('https://httpbin.org/basic-auth/user/passwd', auth=('user', 'password'))
+    assert response.status_code == 401
+    print("Incorrect credentials verified")
 
 # 11. Send a request to httpbin.org/bearer with a valid Bearer Token (mock, e.g., "my-mock-token") and validate the successful authentication.
+def test_auth_3():
+    url = "https://httpbin.org/bearer"
+    headers = {"Authorization": "Bearer my-mock-token"}
+
+    response = requests.get(url, headers=headers)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data.get("authenticated") is True
+    print("Successful authentication")
 
 # 12. Send a request to httpbin.org/bearer without any authorization header and validate if the response is 401.
+def test_auth_4():
+    url = "https://httpbin.org/bearer"
 
+    response = requests.get(url)
+    assert response.status_code == 401
+    print("Authentication failure")
 
 
 
 # --- ADVANCED ASSERTIONS ---
 # 13. Fetch user with ID 1 from JSONPlaceholder and validate the data types of the keys id (int), name (str), address (dict), and company (dict).
+def test_assertions_1():
+    response = requests.get("https://jsonplaceholder.typicode.com/users/1")
+    data = response.json()
+    assert isinstance(data["id"], int)
+    assert isinstance(data["name"], str)
+    assert isinstance(data["address"], dict)
+    assert isinstance(data["company"], dict)
+    assert response.status_code == 200
+    print("Validated data types")
 
 # 14. For the same user, check if the address key contains the sub-keys street, city, and zipcode.
+def test_assertions_2():
+    response = requests.get("https://jsonplaceholder.typicode.com/users/1")
+    data = response.json()
+    address = data.get("address", {})
+    assert response.status_code == 200
+    assert "street" in address
+    assert "city" in address
+    assert "zipcode" in address    
+    print("Address countains all sub-keys")
 
 # 15. Fetch post with ID 10 and validate if the keys userId and id are integers and if title and body are non-empty strings.
+def test_assertions_3():
+    response = requests.get("https://jsonplaceholder.typicode.com/posts/10")
+    data = response.json()
+    assert response.status_code == 200
+    assert isinstance(data["userId"], int)
+    assert isinstance(data["id"], int)
+
+    assert isinstance(data["title"], str) and data["title"].strip() != "" # >>> .strip() pra garantir que não contém apenas espaços
+    assert isinstance(data["body"], str) and data["body"].strip() != "" # >>> .strip() pra garantir que não contém apenas espaços
+
+    print("Verified conditions")
+
 
 # 16. List the photos from album with ID 1 and check if each photo in the response contains the keys albumId, id, title, url, and thumbnailUrl.
 
