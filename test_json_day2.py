@@ -186,11 +186,54 @@ def test_assertions_3():
 
 
 # 16. List the photos from album with ID 1 and check if each photo in the response contains the keys albumId, id, title, url, and thumbnailUrl.
+def test_photos_data():
+    response = requests.get("https://jsonplaceholder.typicode.com/photos?albumId=1")
+    data = response.json()
+    assert response.status_code == 200
+    for photos in data:
+        assert "albumId" in photos 
+        assert "id" in photos 
+        assert "title" in photos 
+        assert "url" in photos 
+        assert "thumbnailUrl" in photos 
+    print ("Photo data verified")
 
 # 17. Check if the email key of user with ID 3 follows a valid email format (contains "@" and "." in the domain part).
+def test_valid_email():
+    response = requests.get("https://jsonplaceholder.typicode.com/users/3")
+    data = response.json()
+    assert response.status_code == 200
+    email = data.get("email")
+    assert "@" in email
+    nome, dominio = email.split("@", 1)
+    assert "." in dominio
+    print (f"The email is valid")
 
 # 18. Fetch the comments for post with ID 5 and check if the list of comments is not empty.
+def test_list_comments_not_empty():
+    response = requests.get("https://jsonplaceholder.typicode.com/comments?postId=5")
+    data = response.json()
+    assert response.status_code == 200
+    assert isinstance(data, list)
+    assert len(data) > 0
+    print ("The list of comments is not empty")
 
 # 19. For the first comment from the previous list, validate the types of postId (int), id (int), name (str), email (str), and body (str).
+def test_valid_data():
+    response = requests.get("https://jsonplaceholder.typicode.com/comments?postId=1")
+    data = response.json()
+    first_comment = data[0]
+    assert isinstance(first_comment["postId"], int)
+    assert isinstance(first_comment["name"], str)
+    assert isinstance(first_comment["email"], str)
+    assert isinstance(first_comment["body"], str)
+    assert response.status_code == 200
+    print("Validated data types")
 
 # 20. Fetch the todo with ID 199 and check if the value of the completed key is a boolean (True or False).
+def test_value_boolean():
+    response = requests.get("https://jsonplaceholder.typicode.com/todos/199")
+    data = response.json()
+    assert response.status_code == 200
+    assert isinstance(data["completed"], bool)
+    print (f"Completed key is a boolean")
